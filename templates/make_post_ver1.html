@@ -37,16 +37,22 @@
 
 
         <!-- TODO:-Add CKEditor and render the form here -->
-        <form action="{{ url_for('add_post') }}" method="POST">
+         {% if control ==2 %}
+            {% set function_name = 'edit_post' %}
+         {% elif control ==1 %}
+            {% set function_name = 'add_post' %}
+            {% set upload_data =0 %}
+         {%endif%}
 
-               {{ form.csrf_token() }}
-               {{ render_field(form.blog_post_title) }}
+          <form action="{{ url_for('edit_post',post_id=post_id) }}" method="POST">
+                   {{ form.csrf_token() }}
+                   {{ render_field(form.blog_post_title) }}
+                   {{ render_field(form.your_name) }}
+                   {{ render_field(form.blog_image_url) }}
+                   {{ render_field(form.content) }}
+                   {{ render_field(form.submit) }}
 
-               {{ render_field(form.your_name,value=yahoo) }}
-               {{ render_field(form.blog_image_url) }}
-               {{ render_field(form.content) }}
-               {{ render_field(form.submit) }}
-        </form>
+          </form>
 
 
 
