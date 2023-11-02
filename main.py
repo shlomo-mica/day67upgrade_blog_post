@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_ckeditor import CKEditorField, CKEditor
 from flask_wtf import FlaskForm, Form
 from wtforms import StringField, SubmitField, TextAreaField
-from wtforms.validators import DataRequired, URL
+from wtforms.validators import DataRequired, URL, InputRequired
 from datetime import date
 from werkzeug.urls import url_encode
 
@@ -24,8 +24,9 @@ This will install the packages from the requirements.txt for this project.
 
 app = Flask(__name__)
 ckeditor = CKEditor(app)
+app.config['SECRET_KEY'] = 'NeLi2023'
 
-app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
+# app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
 Bootstrap5(app)
 
 # app.config['CKEDITOR_PKG_TYPE'] = 'full'
@@ -38,22 +39,22 @@ db.init_app(app)
 # CONFIGURE TABLE
 class BlogPost(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(250), unique=True, nullable=False)
-    subtitle = db.Column(db.String(250), nullable=False)
-    date = db.Column(db.String(250), nullable=False)
-    body = db.Column(db.Text, nullable=False)
-    author = db.Column(db.String(250), nullable=False)
-    img_url = db.Column(db.String(250), nullable=False)
+    title = db.Column(db.String(250), nullable=False)
+    subtitle = db.Column(db.String(250))
+    date = db.Column(db.String(250))
+    body = db.Column(db.Text)
+    author = db.Column(db.String(250))
+    img_url = db.Column(db.String(250))
 
 
 class NewForm(FlaskForm):
     blog_post_title = StringField('Blog Post Title', validators=[DataRequired()])
     subtitle = StringField('Subtitle', validators=[DataRequired()])
-    your_name = StringField('Your Name', validators=[DataRequired()])
+    author_name = StringField('Author Name', validators=[DataRequired()])
     blog_image_url = StringField('Blog Image Url', validators=[DataRequired()])
     # post_body = TextAreaField('The Blog')
     content = CKEditorField('Content')
-    submit = SubmitField()
+    submit = SubmitField('Save')
 
 
 with app.app_context():
@@ -93,11 +94,10 @@ def show_post(post_id):
 @app.route('/add_new_post/', methods=['GET', 'POST'])
 def add_post():
     form = NewForm()
+    # if db.session.query(BlogPost).filter_by(id=1).count()<= 1:
     if form.validate_on_submit():
         flash('Form validated!')
-        form.your_name = 'shlomo22'
-        print(request.form.get('blog_post_title'))
-        print(request.form.get('subtitle'))
+
         add_blog = BlogPost(title=request.form.get('blog_post_title'),
                             subtitle=request.form.get('subtitle'),
                             author=request.form.get('your_name'),
@@ -109,17 +109,54 @@ def add_post():
         db.session.commit()
         return redirect(url_for('get_all_posts'))
 
-    return render_template("make_post.html", form=form, neworedit_post='New-Post', welcome='You are going to make a '
-                                                                                           'great blog post!')
+    return render_template("make_post_ver2.html", form=form, neworedit_post='New-Post',
+                           welcome='You are going to make a '
+                                   'great blog post!')
 
 
+# http://127.0.0.1:5003/add_new_post/url_for('add_post')
 # TODO: edit_post() to change an existing blog post
-@app.route("/edit-post/<post_id>", methods=['GET', 'POST'])
+@app.route('/edit-post/<int:post_id>', methods=['GET', 'POST'])
 def edit_post(post_id):
     form = NewForm()
-    yahoo='yahooo'
+    upload_data = db.session.execute((db.select(BlogPost).where(BlogPost.id == post_id))).scalar()
+    form.content.data = upload_data.body
+    form.author_name.data = upload_data.author
+    form.blog_post_title.data = upload_data.title
+    form.blog_image_url.data = upload_data.img_url
+    form.subtitle.data = upload_data.subtitle
+    if request.method == 'POST':
+        a = BlogPost.query.filter_by(id=post_id).first()
+        updatepost = BlogPost(title=request.form.get('blog_post_title'),
+                              #subtitle=request.form.get('your_name'),
+                              author=request.form.get('author_name'),
+                              img_url=request.form.get('blog_image_url'),
+                              body=request.form.get('content'))
 
-    return render_template('make_post.html', neworedit_post="Edit Post", form=form,yahoo=yahoo)
+        a.title = updatepost.title
+        a.author = updatepost.author
+        a.img_url = updatepost.img_url
+
+        db.session.commit()
+        return redirect(url_for('get_all_posts'))
+        # updatepost.author = "Jack Bauer22"
+        # title =
+        # body = d
+        # author =
+        # img_url
+
+        # return updatepost.author
+        # db.session.execute((db.select(a).where(a.id == post_id))).scalar()
+        # b=BlogPost.subtitle
+
+    return render_template('make_post_ver2.html', control=2, neworedit_post="Edit Post", form=form, post_id=post_id)
+
+
+#
+# db.session.commit()
+#     db.session.add(add_blog)
+#
+#     return redirect(url_for('get_all_posts'))
 
 
 # TODO: delete_post() to remove a blog post from the database
