@@ -1,0 +1,63 @@
+{% include "header.html" %}
+{% from 'bootstrap5/form.html' import render_field, render_hidden_errors%}
+
+{% block content %}
+
+<!-- Page Header -->
+<header
+  class="masthead"
+  style="background-image: url('../static/assets/img/edit-bg.jpg')">
+     {{ ckeditor.load() }}
+<script src="https://cdn.ckeditor.com/4.16.1/standard/ckeditor.js"></script>
+
+  <div class="container position-relative px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+      <div class="col-md-10 col-lg-8 col-xl-7">
+        <div class="page-heading">
+
+
+
+
+          <h1>{{ neworedit_post }}</h1>
+          <span class="subheading">
+           {{ welcome }}</span>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="mb-4" style="background-color:LightGray;">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+
+
+
+
+        <!-- TODO:-Add CKEditor and render the form here -->
+
+
+          <form action="{{ url_for('edit_post',post_id=post_id) }}" method="POST">
+                   {{ form.csrf_token() }}
+                   {{ render_field(form.blog_post_title) }}
+                   {{ render_field(form.author_name) }}
+                   {{ render_field(form.blog_image_url) }}
+                   {{ render_field(form.content) }}
+                   {{ render_field(form.submit) }}
+
+          </form>
+
+
+
+
+          {{ ckeditor.config(name='content') }}
+
+      </div>
+    </div>
+  </div>
+</main>
+
+{% include "footer.html" %}
+{% endblock %}
