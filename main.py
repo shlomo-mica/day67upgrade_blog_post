@@ -94,13 +94,15 @@ def show_post(post_id):
 @app.route('/add_new_post/', methods=['GET', 'POST'])
 def add_post():
     form = NewForm()
+    add_edit_function = url_for('add_post')
+
     # if db.session.query(BlogPost).filter_by(id=1).count()<= 1:
-    if form.validate_on_submit():
+    if request.method == 'POST':
         flash('Form validated!')
 
         add_blog = BlogPost(title=request.form.get('blog_post_title'),
                             subtitle=request.form.get('subtitle'),
-                            author=request.form.get('your_name'),
+                            author=request.form.get('author_name'),
                             img_url=request.form.get('blog_image_url'),
                             body=request.form.get('content'),
                             date=date.today().strftime("%b, %d, %Y"))
@@ -109,7 +111,8 @@ def add_post():
         db.session.commit()
         return redirect(url_for('get_all_posts'))
 
-    return render_template("make_post_ver2.html", form=form, neworedit_post='New-Post',
+    return render_template("make_post_ver2.html", add_post_function=add_edit_function, form=form,
+                           neworedit_post='New-Post',
                            welcome='You are going to make a '
                                    'great blog post!')
 
@@ -119,6 +122,7 @@ def add_post():
 @app.route('/edit-post/<int:post_id>', methods=['GET', 'POST'])
 def edit_post(post_id):
     form = NewForm()
+    add_edit_function = url_for('edit_post',post_id=post_id)
     upload_data = db.session.execute((db.select(BlogPost).where(BlogPost.id == post_id))).scalar()
     form.content.data = upload_data.body
     form.author_name.data = upload_data.author
@@ -128,7 +132,7 @@ def edit_post(post_id):
     if request.method == 'POST':
         a = BlogPost.query.filter_by(id=post_id).first()
         updatepost = BlogPost(title=request.form.get('blog_post_title'),
-                              #subtitle=request.form.get('your_name'),
+                              # subtitle=request.form.get('your_name'),
                               author=request.form.get('author_name'),
                               img_url=request.form.get('blog_image_url'),
                               body=request.form.get('content'))
@@ -139,17 +143,12 @@ def edit_post(post_id):
 
         db.session.commit()
         return redirect(url_for('get_all_posts'))
-        # updatepost.author = "Jack Bauer22"
-        # title =
-        # body = d
-        # author =
-        # img_url
 
-        # return updatepost.author
         # db.session.execute((db.select(a).where(a.id == post_id))).scalar()
         # b=BlogPost.subtitle
 
-    return render_template('make_post_ver2.html', control=2, neworedit_post="Edit Post", form=form, post_id=post_id)
+    return render_template('make_post_ver2.html', add_edit_function=add_edit_function, neworedit_post="Edit Post",
+                           form=form, post_id=post_id)
 
 
 #

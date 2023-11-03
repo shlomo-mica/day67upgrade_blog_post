@@ -32,22 +32,27 @@
   <div class="container">
     <div class="row">
       <div class="col-lg-8 col-md-10 mx-auto">
+        {% if neworedit_post == 'New-Post'%}
+          {% set post_id = 0 %}
 
+          <h5> {{ post_id  }}</h5>
+        {% endif %}
 
 
 
         <!-- TODO:-Add CKEditor and render the form here -->
 
-
-          <form action="{{ url_for('edit_post',post_id=post_id) }}" method="POST">
+                "{{ url_for('edit_post',post_id=post_id) }}
+          <form action="{{add_edit_function}}" method="POST">
                    {{ form.csrf_token() }}
                    {{ render_field(form.blog_post_title) }}
+                   {{ render_field(form.subtitle) }}
                    {{ render_field(form.author_name) }}
                    {{ render_field(form.blog_image_url) }}
                    {{ render_field(form.content) }}
                    {{ render_field(form.submit) }}
-
           </form>
+
 
 
 
