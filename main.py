@@ -122,7 +122,7 @@ def add_post():
 @app.route('/edit-post/<int:post_id>', methods=['GET', 'POST'])
 def edit_post(post_id):
     form = NewForm()
-    add_edit_function = url_for('edit_post',post_id=post_id)
+    add_edit_function = url_for('edit_post', post_id=post_id)
     upload_data = db.session.execute((db.select(BlogPost).where(BlogPost.id == post_id))).scalar()
     form.content.data = upload_data.body
     form.author_name.data = upload_data.author
@@ -144,21 +144,21 @@ def edit_post(post_id):
         db.session.commit()
         return redirect(url_for('get_all_posts'))
 
-        # db.session.execute((db.select(a).where(a.id == post_id))).scalar()
-        # b=BlogPost.subtitle
-
     return render_template('make_post_ver2.html', add_edit_function=add_edit_function, neworedit_post="Edit Post",
                            form=form, post_id=post_id)
 
 
-#
-# db.session.commit()
-#     db.session.add(add_blog)
-#
-#     return redirect(url_for('get_all_posts'))
-
-
 # TODO: delete_post() to remove a blog post from the database
+@app.route('/delete/<int:post_id>', methods=['GET','POST'])
+def delete_post(post_id):
+    if request.method == 'GET':
+        delete_row = db.session.execute((db.select(BlogPost).where(BlogPost.id == post_id))).scalar()
+        db.session.delete(delete_row)
+        db.session.commit()
+        return redirect(url_for('get_all_posts'))
+
+
+
 
 # Below is the code from previous lessons. No changes needed.
 @app.route("/about")
